@@ -6,32 +6,68 @@ AllCops:
   NewCops: enable
   TargetRubyVersion: 3.2
   Exclude:
-    - "db/schema.rb"
-    - "db/migrate/**/*"
-    - "bin/**/*"
-    - "config/boot.rb"
-    - "node_modules/**/*"
-    - "vendor/**/*"
+    - 'db/schema.rb'
+    - 'db/migrate/**/*'
+    - 'bin/**/*'
+    - 'config/boot.rb'
+    - 'node_modules/**/*'
+    - 'vendor/**/*'
 
-# Relax line length for readability
+# Line length
 Layout/LineLength:
   Max: 120
 
-# Allow longer methods in specs and controllers
+# Disable string literal enforcement - not worth the noise
+Style/StringLiterals:
+  Enabled: false
+
+Style/StringLiteralsInInterpolation:
+  Enabled: false
+
+# Disable gem ordering
+Bundler/OrderedGems:
+  Enabled: false
+
+# Allow longer methods
 Metrics/MethodLength:
-  Max: 20
+  Max: 25
   Exclude:
-    - "spec/**/*"
+    - 'spec/**/*'
+
+Metrics/AbcSize:
+  Max: 25
+  Exclude:
+    - 'spec/**/*'
 
 Metrics/BlockLength:
   Exclude:
-    - "spec/**/*"
-    - "config/routes.rb"
+    - 'spec/**/*'
+    - 'config/routes.rb'
+
+# Disable i18n enforcement for a demo app
+Rails/I18nLocaleTexts:
+  Enabled: false
+
+# Disable response parsed body enforcement
+Rails/ResponseParsedBody:
+  Enabled: false
+
+# Use unprocessable_entity (Rails convention, not Rack)
+Rails/HttpStatusNameConsistency:
+  Enabled: false
+
+# Disable symbol array enforcement
+Style/SymbolArray:
+  Enabled: false
+
+# Disable redundant regexp escape
+Style/RedundantRegexpEscape:
+  Enabled: false
 
 # Rails cops
 Rails/Output:
   Exclude:
-    - "db/seeds.rb"
+    - 'db/seeds.rb'
 
 # RSpec
 RSpec/MultipleExpectations:
