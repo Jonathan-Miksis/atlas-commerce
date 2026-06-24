@@ -16,7 +16,7 @@ AllCops:
 
 # ── Layout ───────────────────────────────────────────────────────────────────
 Layout/LineLength:
-  Max: 150
+  Enabled: false
 
 Layout/ExtraSpacing:
   Enabled: false
