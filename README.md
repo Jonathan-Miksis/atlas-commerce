@@ -61,3 +61,4 @@ Every pull request runs three jobs in parallel:
 - **Build** — Boot verification
 
 Merging to `main` triggers automatic deployment to **staging**. Promotion to **production** requires a manual approval and creates a full audit trail.
+
