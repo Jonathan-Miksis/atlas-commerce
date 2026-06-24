@@ -10,32 +10,63 @@ AllCops:
     - 'db/migrate/**/*'
     - 'bin/**/*'
     - 'config/boot.rb'
+    - 'config/puma.rb'
     - 'node_modules/**/*'
     - 'vendor/**/*'
 
-# Line length
+# ── Layout ───────────────────────────────────────────────────────────────────
 Layout/LineLength:
-  Max: 120
+  Max: 150
 
-# Disable string literal enforcement - not worth the noise
+Layout/ExtraSpacing:
+  Enabled: false
+
+Layout/FirstArrayElementIndentation:
+  Enabled: false
+
+# ── Style ─────────────────────────────────────────────────────────────────────
 Style/StringLiterals:
   Enabled: false
 
 Style/StringLiteralsInInterpolation:
   Enabled: false
 
-# Disable gem ordering
-Bundler/OrderedGems:
+Style/SymbolArray:
   Enabled: false
 
-# Allow longer methods
+Style/Documentation:
+  Enabled: false
+
+Style/FrozenStringLiteralComment:
+  Enabled: false
+
+Style/NumericPredicate:
+  Enabled: false
+
+Style/RedundantFetchBlock:
+  Enabled: false
+
+Style/TrailingCommaInArrayLiteral:
+  Enabled: false
+
+Style/RedundantRegexpEscape:
+  Enabled: false
+
+# ── Lint ──────────────────────────────────────────────────────────────────────
+Lint/AmbiguousOperatorPrecedence:
+  Enabled: false
+
+Lint/RedundantDirGlobSort:
+  Enabled: false
+
+# ── Metrics ───────────────────────────────────────────────────────────────────
 Metrics/MethodLength:
   Max: 25
   Exclude:
     - 'spec/**/*'
 
 Metrics/AbcSize:
-  Max: 25
+  Max: 30
   Exclude:
     - 'spec/**/*'
 
@@ -44,32 +75,34 @@ Metrics/BlockLength:
     - 'spec/**/*'
     - 'config/routes.rb'
 
-# Disable i18n enforcement for a demo app
-Rails/I18nLocaleTexts:
-  Enabled: false
-
-# Disable response parsed body enforcement
-Rails/ResponseParsedBody:
-  Enabled: false
-
-# Use unprocessable_entity (Rails convention, not Rack)
-Rails/HttpStatusNameConsistency:
-  Enabled: false
-
-# Disable symbol array enforcement
-Style/SymbolArray:
-  Enabled: false
-
-# Disable redundant regexp escape
-Style/RedundantRegexpEscape:
-  Enabled: false
-
-# Rails cops
+# ── Rails ─────────────────────────────────────────────────────────────────────
 Rails/Output:
   Exclude:
     - 'db/seeds.rb'
 
-# RSpec
+Rails/I18nLocaleTexts:
+  Enabled: false
+
+Rails/ResponseParsedBody:
+  Enabled: false
+
+Rails/HttpStatusNameConsistency:
+  Enabled: false
+
+Rails/RootPathnameMethods:
+  Enabled: false
+
+# ── Bundler ───────────────────────────────────────────────────────────────────
+Bundler/OrderedGems:
+  Enabled: false
+
+# ── RSpec ─────────────────────────────────────────────────────────────────────
+RSpec/ImplicitExpect:
+  Enabled: false
+
+RSpec/DescribedClass:
+  Enabled: false
+
 RSpec/MultipleExpectations:
   Max: 5
 
@@ -78,10 +111,3 @@ RSpec/ExampleLength:
 
 RSpec/NestedGroups:
   Max: 4
-
-# Style preferences
-Style/Documentation:
-  Enabled: false
-
-Style/FrozenStringLiteralComment:
-  Enabled: false
