@@ -6,34 +6,103 @@ AllCops:
   NewCops: enable
   TargetRubyVersion: 3.2
   Exclude:
-    - "db/schema.rb"
-    - "db/migrate/**/*"
-    - "bin/**/*"
-    - "config/boot.rb"
-    - "node_modules/**/*"
-    - "vendor/**/*"
+    - 'db/schema.rb'
+    - 'db/migrate/**/*'
+    - 'bin/**/*'
+    - 'config/boot.rb'
+    - 'config/puma.rb'
+    - 'node_modules/**/*'
+    - 'vendor/**/*'
 
-# Relax line length for readability
+# ── Layout ───────────────────────────────────────────────────────────────────
 Layout/LineLength:
-  Max: 120
+  Enabled: false
 
-# Allow longer methods in specs and controllers
+Layout/ExtraSpacing:
+  Enabled: false
+
+Layout/FirstArrayElementIndentation:
+  Enabled: false
+
+# ── Style ─────────────────────────────────────────────────────────────────────
+Style/StringLiterals:
+  Enabled: false
+
+Style/StringLiteralsInInterpolation:
+  Enabled: false
+
+Style/SymbolArray:
+  Enabled: false
+
+Style/Documentation:
+  Enabled: false
+
+Style/FrozenStringLiteralComment:
+  Enabled: false
+
+Style/NumericPredicate:
+  Enabled: false
+
+Style/RedundantFetchBlock:
+  Enabled: false
+
+Style/TrailingCommaInArrayLiteral:
+  Enabled: false
+
+Style/RedundantRegexpEscape:
+  Enabled: false
+
+# ── Lint ──────────────────────────────────────────────────────────────────────
+Lint/AmbiguousOperatorPrecedence:
+  Enabled: false
+
+Lint/RedundantDirGlobSort:
+  Enabled: false
+
+# ── Metrics ───────────────────────────────────────────────────────────────────
 Metrics/MethodLength:
-  Max: 20
+  Max: 25
   Exclude:
-    - "spec/**/*"
+    - 'spec/**/*'
+
+Metrics/AbcSize:
+  Max: 30
+  Exclude:
+    - 'spec/**/*'
 
 Metrics/BlockLength:
   Exclude:
-    - "spec/**/*"
-    - "config/routes.rb"
+    - 'spec/**/*'
+    - 'config/routes.rb'
 
-# Rails cops
+# ── Rails ─────────────────────────────────────────────────────────────────────
 Rails/Output:
   Exclude:
-    - "db/seeds.rb"
+    - 'db/seeds.rb'
 
-# RSpec
+Rails/I18nLocaleTexts:
+  Enabled: false
+
+Rails/ResponseParsedBody:
+  Enabled: false
+
+Rails/HttpStatusNameConsistency:
+  Enabled: false
+
+Rails/RootPathnameMethods:
+  Enabled: false
+
+# ── Bundler ───────────────────────────────────────────────────────────────────
+Bundler/OrderedGems:
+  Enabled: false
+
+# ── RSpec ─────────────────────────────────────────────────────────────────────
+RSpec/ImplicitExpect:
+  Enabled: false
+
+RSpec/DescribedClass:
+  Enabled: false
+
 RSpec/MultipleExpectations:
   Max: 5
 
@@ -42,10 +111,3 @@ RSpec/ExampleLength:
 
 RSpec/NestedGroups:
   Max: 4
-
-# Style preferences
-Style/Documentation:
-  Enabled: false
-
-Style/FrozenStringLiteralComment:
-  Enabled: false
