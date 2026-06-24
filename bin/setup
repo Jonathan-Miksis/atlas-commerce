@@ -1,0 +1,24 @@
+#!/usr/bin/env ruby
+require "fileutils"
+
+APP_ROOT = File.expand_path("..", __dir__)
+APP_NAME = "atlas-commerce"
+
+def system!(*args)
+  system(*args, exception: true)
+end
+
+FileUtils.chdir APP_ROOT do
+  puts "== Installing dependencies =="
+  system! "gem install bundler --conservative"
+  system("bundle check") || system!("bundle install")
+
+  puts "\n== Preparing database =="
+  system! "bundle exec rails db:prepare"
+
+  puts "\n== Seeding database =="
+  system! "bundle exec rails db:seed"
+
+  puts "\n== All done! =="
+  puts "Run 'bin/rails server' to start the app"
+end
