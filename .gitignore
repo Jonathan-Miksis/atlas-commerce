@@ -1,0 +1,17 @@
+/.bundle
+/log/*
+/tmp/*
+!/log/.keep
+!/tmp/.keep
+/db/*.sqlite3
+/db/*.sqlite3-*
+/public/assets
+/storage/*
+!/storage/.keep
+/node_modules
+.byebug_history
+.env
+.env.*
+!.env.example
+coverage/
+spec/examples.txt
