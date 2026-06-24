@@ -22,3 +22,15 @@ class Product < ApplicationRecord
     (price * (1 - percent / 100.0)).round(2)
   end
 end
+
+  def bulk_price(quantity)
+    raise ArgumentError, "Quantity must be positive" unless quantity.positive?
+
+    discount = case quantity
+               when 1..9   then 0
+               when 10..49 then 5
+               when 50..99 then 10
+               else 15
+               end
+    discounted_price(discount)
+  end
