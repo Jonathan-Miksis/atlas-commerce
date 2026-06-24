@@ -35,10 +35,12 @@ echo ""
 echo "→ Creating $GREEN_BRANCH..."
 git checkout -b "$GREEN_BRANCH"
 
-cat >> app/models/product.rb << 'RUBY'
+python3 -c "
+content = open('app/models/product.rb').read()
+method = '''
 
   def bulk_price(quantity)
-    raise ArgumentError, "Quantity must be positive" unless quantity.positive?
+    raise ArgumentError, 'Quantity must be positive' unless quantity.positive?
 
     discount = case quantity
                when 1..9   then 0
@@ -48,7 +50,10 @@ cat >> app/models/product.rb << 'RUBY'
                end
     discounted_price(discount)
   end
-RUBY
+end'''
+content = content.rstrip().rstrip('end').rstrip() + method
+open('app/models/product.rb', 'w').write(content)
+"
 
 git add app/models/product.rb
 git commit -m "feat: add bulk pricing tiers to Product model
