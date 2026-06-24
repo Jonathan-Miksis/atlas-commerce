@@ -68,17 +68,11 @@ RSpec.describe Product, type: :model do
     end
   end
 
-  # -----------------------------------------------------------------------
-  # DEMO NOTE: This test is intentionally written correctly and passes.
-  # For Beat 2 of the live demo (the failing test), use the branch
-  # `demo/failing-test` which changes the assertion to expect the WRONG
-  # value — proving that bad logic is caught before it reaches main.
-  # -----------------------------------------------------------------------
   describe "#discounted_price" do
     let(:product) { build(:product, price: 100.00) }
 
     it "applies a percentage discount correctly" do
-      expect(product.discounted_price(20)).to eq(80.00)
+      expect(product.discounted_price(20)).to eq(75.00)
     end
 
     it "handles a 0% discount" do
