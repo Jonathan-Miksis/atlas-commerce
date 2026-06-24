@@ -78,7 +78,7 @@ RSpec.describe Product, type: :model do
     let(:product) { build(:product, price: 100.00) }
 
     it "applies a percentage discount correctly" do
-      expect(product.discounted_price(20)).to eq(75.00)
+      expect(product.discounted_price(20)).to eq(80.00)
     end
 
     it "handles a 0% discount" do
