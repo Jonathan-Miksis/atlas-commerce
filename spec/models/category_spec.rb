@@ -9,7 +9,6 @@ RSpec.describe Category, type: :model do
     subject { build(:category) }
 
     it { should validate_presence_of(:name) }
-    it { should validate_presence_of(:slug) }
     it { should validate_uniqueness_of(:slug) }
 
     it "requires name to be at least 2 characters" do
@@ -19,6 +18,11 @@ RSpec.describe Category, type: :model do
 
     it "requires slug to be lowercase alphanumeric with hyphens" do
       category = build(:category, slug: "Invalid Slug!")
+      expect(category).not_to be_valid
+    end
+
+    it "requires slug to be present" do
+      category = build(:category, name: nil, slug: nil)
       expect(category).not_to be_valid
     end
   end
