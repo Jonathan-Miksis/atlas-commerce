@@ -1,9 +1,21 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# CD Workflow — deploys Atlas Commerce after a merge to main
+#
+# Two deployment paths:
+#   Automatic: merging to main triggers staging → then production (gated)
+#   Manual:    the "Run workflow" button lets you deploy on demand, any time
+#
+# Staging deploys automatically. Production requires a human approval.
+# Every deployment — automatic or manual — is logged with who, when, and why.
+# ─────────────────────────────────────────────────────────────────────────────
+
 name: CD
 
 on:
   push:
-    branches: [main]
-  workflow_dispatch:
+    branches: [main]        # automatic path — merge to main triggers this
+
+  workflow_dispatch:        # manual path — adds a "Run workflow" button in the UI
     inputs:
       environment:
         description: "Target environment"
@@ -14,17 +26,21 @@ on:
           - staging
           - production
       reason:
-        description: "Reason for manual deploy (shown in audit trail)"
+        description: "Reason for manual deploy (appears in the audit log)"
         required: false
         type: string
 
 jobs:
+
+  # ── Job 1: Deploy to Staging ─────────────────────────────────────────────────
+  # Runs automatically on every merge to main.
+  # No approval required — staging is the safe testing ground.
   deploy-staging:
     name: Deploy to Staging
     runs-on: ubuntu-latest
     environment:
-      name: staging
-      url: https://atlas-commerce-staging.example.com
+      name: staging                                      # named environment in GitHub
+      url: https://atlas-commerce-staging.example.com   # shown in the deployment UI
 
     steps:
       - name: Checkout code
@@ -37,6 +53,8 @@ jobs:
           bundler-cache: true
 
       - name: Show deploy context
+        # github context variables — automatically available in every workflow run
+        # this is why the audit log captures commit, actor, and trigger for free
         run: |
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
           echo "  Atlas Commerce — Staging Deploy"
@@ -58,16 +76,23 @@ jobs:
           echo ""
           echo "✓ Atlas Commerce deployed to staging"
           echo "✓ Health check passed: GET /health → 200 OK"
+        # In a real deployment: swap these echo commands for your actual
+        # deploy steps — Heroku, Render, Fly.io, Kubernetes, etc.
 
+  # ── Job 2: Deploy to Production ──────────────────────────────────────────────
+  # Runs after staging succeeds (needs: deploy-staging).
+  # GATED — requires a human reviewer to approve before the runner starts.
+  # The approval, approver identity, and timestamp are logged automatically.
   deploy-production:
     name: Deploy to Production
     runs-on: ubuntu-latest
-    needs: deploy-staging
-    # Only deploy to production on push to main OR when manually targeting production
+    needs: deploy-staging   # staging must pass before production can start
+    # Only runs on push to main OR when manually targeting production
     if: github.event_name == 'push' || inputs.environment == 'production'
     environment:
-      name: production
-      url: https://atlas-commerce.example.com
+      name: production                              # protected environment
+      url: https://atlas-commerce.example.com       # requires reviewer approval
+      # Required reviewers are configured in Settings → Environments → production
 
     steps:
       - name: Checkout code

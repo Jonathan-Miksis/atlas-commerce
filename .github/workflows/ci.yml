@@ -1,31 +1,50 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# CI Workflow — runs on every pull request targeting main
+#
+# What this does: automatically lints, tests, and builds the app whenever
+# a PR is opened or updated. All three jobs run in parallel — the result
+# appears on the PR before a human reviewer opens it.
+# ─────────────────────────────────────────────────────────────────────────────
+
 name: CI
 
+# Triggers — what causes this workflow to run
 on:
   pull_request:
-    branches: [main]
+    branches: [main]   # fires when a PR targets main
   push:
-    branches: [main]
+    branches: [main]   # also runs on direct push (keeps the badge current)
 
 jobs:
+
+  # ── Job 1: Lint ─────────────────────────────────────────────────────────────
+  # Runs RuboCop to enforce code style.
+  # Catches formatting issues so reviewers can focus on logic, not style.
   lint:
     name: Lint (RuboCop)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest   # GitHub-hosted runner — fresh VM, destroyed after
+
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4   # Marketplace action — clones the repo
 
       - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
-        with:
+        uses: ruby/setup-ruby@v1    # Marketplace action — installs Ruby,
+        with:                       # configures bundler, handles gem caching
           ruby-version: "3.2.3"
-          bundler-cache: true
+          bundler-cache: true       # caches gems between runs for speed
 
       - name: Run RuboCop
-        run: bundle exec rubocop --format github
+        run: bundle exec rubocop --format github   # shell command on the runner
+        # --format github annotates violations directly on the PR diff
 
+  # ── Job 2: Test ─────────────────────────────────────────────────────────────
+  # Runs the full RSpec suite against a clean test database.
+  # This is the gate — a failing test blocks the merge button entirely.
   test:
     name: Test (RSpec)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest   # separate runner from lint — runs in parallel
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -41,7 +60,7 @@ jobs:
           bundle exec rails db:create
           bundle exec rails db:migrate
         env:
-          RAILS_ENV: test
+          RAILS_ENV: test   # environment variables injected into the runner
 
       - name: Run RSpec
         run: |
@@ -49,19 +68,25 @@ jobs:
             --format documentation \
             --format RspecJunitFormatter \
             --out tmp/rspec-results.xml
+        # --format documentation: prints each test name as it runs
+        # RspecJunitFormatter: generates structured XML for the results artifact
         env:
           RAILS_ENV: test
 
       - name: Upload test results
-        uses: actions/upload-artifact@v4
-        if: always()
+        uses: actions/upload-artifact@v4   # persists the XML beyond the job
+        if: always()                       # runs even if tests failed
         with:
           name: rspec-test-results
           path: tmp/rspec-results.xml
 
+  # ── Job 3: Build ────────────────────────────────────────────────────────────
+  # Boots the Rails app in a clean environment to catch load-time errors.
+  # Verifies the app starts successfully — independent of the test suite.
   build:
     name: Build check
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest   # third separate runner — all three jobs are parallel
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
