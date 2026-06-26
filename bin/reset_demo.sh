@@ -198,13 +198,8 @@ class Product < ApplicationRecord
   def volume_price(customer_tier)
     raise ArgumentError, "Invalid customer tier" unless %w[standard silver gold platinum].include?(customer_tier)
 
-    multiplier = case customer_tier
-                 when "standard" then 1.0
-                 when "silver"   then 0.95
-                 when "gold"     then 0.90
-                 when "platinum" then 0.85
-                 end
-    (price * multiplier).round(2)
+    multipliers = { "standard" => 1.0, "silver" => 0.95, "gold" => 0.90, "platinum" => 0.85 }
+    (price * multipliers[customer_tier]).round(2)
   end
 end
 RUBY
