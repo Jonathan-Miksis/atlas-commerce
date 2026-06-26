@@ -103,6 +103,12 @@ RSpec/ImplicitExpect:
 RSpec/DescribedClass:
   Enabled: false
 
+RSpec/DescribeClass:
+  Enabled: false
+
+RSpec/MultipleDescribes:
+  Enabled: false
+
 RSpec/MultipleExpectations:
   Max: 5
 
