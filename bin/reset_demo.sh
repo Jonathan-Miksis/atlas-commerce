@@ -6,7 +6,7 @@
 # ─────────────────────────────────────────────────────────────────────────────
 set -e
 
-GREEN_BRANCH="feature/add-bulk-pricing"
+GREEN_BRANCH="feature/add-flash-sale-pricing"
 RED_BRANCH="demo/failing-test"
 
 echo ""
@@ -23,7 +23,7 @@ git reset --hard origin/main
 
 # ── 2. Delete old branches locally and remotely ──────────────────────────────
 echo "→ Removing old demo branches..."
-for branch in "$GREEN_BRANCH" "$RED_BRANCH"; do
+for branch in "$GREEN_BRANCH" "$RED_BRANCH" "feature/add-bulk-pricing"; do
   git branch -D "$branch" 2>/dev/null && echo "  deleted local: $branch" || echo "  no local branch: $branch"
   git push origin --delete "$branch" 2>/dev/null && echo "  deleted remote: $branch" || echo "  no remote branch: $branch"
 done
@@ -142,13 +142,13 @@ Updated expected discount calculation to reflect new rates."
 git push origin "$RED_BRANCH"
 echo "  ✓ $RED_BRANCH pushed"
 
-# ── 4. Create feature/add-bulk-pricing LAST (GREEN — passes CI) ──────────────
+# ── 4. Create feature/add-flash-sale-pricing LAST (GREEN — passes CI) ─────────
 echo ""
 echo "→ Creating $GREEN_BRANCH..."
 git checkout main
 git checkout -b "$GREEN_BRANCH"
 
-# Write the complete product.rb with bulk_price already included
+# Write complete product.rb with flash_sale_price method added
 cat > app/models/product.rb << 'RUBY'
 class Product < ApplicationRecord
   belongs_to :category
@@ -185,19 +185,29 @@ class Product < ApplicationRecord
                end
     discounted_price(discount)
   end
+
+  def flash_sale_price(sale_percent, starts_at, ends_at)
+    raise ArgumentError, "Sale percent must be between 1 and 90" unless sale_percent.between?(1, 90)
+    raise ArgumentError, "Sale must end after it starts" unless ends_at > starts_at
+
+    return price unless Time.current.between?(starts_at, ends_at)
+
+    discounted_price(sale_percent)
+  end
 end
 RUBY
 
 git add app/models/product.rb
-git commit -m "feat: add bulk pricing tiers to Product model
+git commit -m "feat: add time-bounded flash sale pricing to Product model
 
-Products now support quantity-based pricing:
-- 1-9 units:   list price
-- 10-49 units: 5% discount
-- 50-99 units: 10% discount
-- 100+ units:  15% discount
+Products now support flash sale pricing with automatic
+time-based activation and expiry:
+- Accepts a discount percent, start time, and end time
+- Returns the discounted price only during the active window
+- Returns list price outside the sale window
+- Validates sale percent is between 1 and 90
 
-Closes #12"
+Closes #14"
 
 git push origin "$GREEN_BRANCH"
 echo "  ✓ $GREEN_BRANCH pushed"
@@ -212,14 +222,11 @@ echo "║                                                                      �
 echo "║  Go to: github.com/Jonathan-Miksis/atlas-commerce                   ║"
 echo "║                                                                      ║"
 echo "║  Demo arc:                                                           ║"
-echo "║    1. Open PR from demo/failing-test   → CI fails, merge blocked   ║"
-echo "║    2. Close that PR (don't merge)                                   ║"
-echo "║    3. Open PR from feature/add-bulk-pricing → CI passes            ║"
+echo "║    1. Open PR from demo/failing-test        → CI fails (red)       ║"
+echo "║    2. Close without merging                                         ║"
+echo "║    3. Open PR from feature/add-flash-sale-pricing → CI passes      ║"
 echo "║    4. Merge → staging auto-deploys                                  ║"
 echo "║    5. Approve production deployment                                 ║"
-echo "║    6. Actions tab → Run workflow button → show on-demand deploy     ║"
-echo "║                                                                      ║"
-echo "║  workflow_dispatch (Run workflow button):                            ║"
-echo "║    Actions tab → CD → Run workflow → pick environment + reason      ║"
+echo "║    6. Actions tab → Run workflow → on-demand deploy                 ║"
 echo "╚══════════════════════════════════════════════════════════════════════╝"
 echo ""
