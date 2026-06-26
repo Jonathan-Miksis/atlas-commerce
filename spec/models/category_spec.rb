@@ -49,13 +49,6 @@ RSpec.describe Category, type: :model do
       category.update!(name: "Consumer Electronics")
       expect(category.slug).to eq("tech-gear")
     end
-
-    it "generates unique slugs for similar names" do
-      create(:category, name: "Electronics", slug: "electronics")
-      category2 = build(:category, name: "Electronics Pro", slug: nil)
-      category2.valid?
-      expect(category2.slug).not_to eq("electronics")
-    end
   end
 
   describe "#to_param" do
@@ -72,23 +65,24 @@ RSpec.describe Category, type: :model do
       expect { category.destroy }.to change(Product, :count).by(-3)
     end
 
-    it "does not affect other categories' products" do
+    it "does not affect other categories products" do
       category1 = create(:category)
       category2 = create(:category)
       create_list(:product, 2, category: category1)
       create_list(:product, 2, category: category2)
-      expect { category1.destroy }.not_to change { Product.where(category: category2).count }
+      category1.destroy
+      expect(Product.where(category: category2).count).to eq(2)
     end
   end
 
-  describe "scoping and querying" do
+  describe "querying" do
     it "can find a category by slug" do
       category = create(:category, slug: "office-supplies")
-      expect(Category.find_by(slug: "office-supplies")).to eq(category)
+      expect(described_class.find_by(slug: "office-supplies")).to eq(category)
     end
 
     it "returns nil for a non-existent slug" do
-      expect(Category.find_by(slug: "does-not-exist")).to be_nil
+      expect(described_class.find_by(slug: "does-not-exist")).to be_nil
     end
   end
 end

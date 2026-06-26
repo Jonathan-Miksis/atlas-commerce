@@ -1,10 +1,10 @@
 require "rails_helper"
 
 RSpec.describe "Api::V1::Categories", type: :request do
-  let!(:electronics) { create(:category, name: "Electronics", slug: "electronics") }
-  let!(:office)      { create(:category, name: "Office Supplies", slug: "office-supplies") }
-
   describe "GET /api/v1/categories" do
+    let!(:electronics) { create(:category, name: "Electronics", slug: "electronics") }
+    let!(:office) { create(:category, name: "Office Supplies", slug: "office-supplies") }
+
     it "returns all categories" do
       get "/api/v1/categories"
       expect(response).to have_http_status(:ok)
@@ -17,14 +17,16 @@ RSpec.describe "Api::V1::Categories", type: :request do
       expect(category.keys).to include("id", "name", "slug")
     end
 
-    it "returns categories in order" do
+    it "returns categories in alphabetical order" do
       get "/api/v1/categories"
-      names = response.parsed_body.map { |c| c["name"] }
+      names = response.parsed_body.pluck("name")
       expect(names).to eq(names.sort)
     end
   end
 
   describe "GET /api/v1/categories/:slug" do
+    let!(:electronics) { create(:category, name: "Electronics", slug: "electronics") }
+
     context "with a valid slug" do
       it "returns the category" do
         get "/api/v1/categories/electronics"
@@ -39,7 +41,7 @@ RSpec.describe "Api::V1::Categories", type: :request do
       end
 
       it "only returns active products" do
-        create(:product, :active, category: electronics)
+        create(:product, category: electronics, active: true)
         create(:product, :inactive, category: electronics)
         get "/api/v1/categories/electronics"
         expect(response.parsed_body["products"].length).to eq(1)
