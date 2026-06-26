@@ -15,6 +15,13 @@ on:
   push:
     branches: [main]   # also runs on direct push (keeps the badge current)
 
+# Concurrency control — if a new commit is pushed to the same PR while
+# CI is still running, cancel the in-progress run and start fresh.
+# You always see results for the latest code, never stale runs.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
 
   # ── Job 1: Lint ─────────────────────────────────────────────────────────────
