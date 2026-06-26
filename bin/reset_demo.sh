@@ -6,7 +6,7 @@
 # ─────────────────────────────────────────────────────────────────────────────
 set -e
 
-GREEN_BRANCH="feature/add-flash-sale-pricing"
+GREEN_BRANCH="feature/add-volume-pricing"
 RED_BRANCH="demo/failing-test"
 
 echo ""
@@ -23,7 +23,9 @@ git reset --hard origin/main
 
 # ── 2. Delete old branches locally and remotely ──────────────────────────────
 echo "→ Removing old demo branches..."
-for branch in "$GREEN_BRANCH" "$RED_BRANCH" "feature/add-bulk-pricing"; do
+for branch in "$GREEN_BRANCH" "$RED_BRANCH" \
+              "feature/add-bulk-pricing" \
+              "feature/add-flash-sale-pricing"; do
   git branch -D "$branch" 2>/dev/null && echo "  deleted local: $branch" || echo "  no local branch: $branch"
   git push origin --delete "$branch" 2>/dev/null && echo "  deleted remote: $branch" || echo "  no remote branch: $branch"
 done
@@ -33,7 +35,6 @@ echo ""
 echo "→ Creating $RED_BRANCH..."
 git checkout -b "$RED_BRANCH"
 
-# Write spec with deliberate bug — asserts 75.00 instead of correct 80.00
 cat > spec/models/product_spec.rb << 'SPEC'
 require "rails_helper"
 
@@ -142,13 +143,12 @@ Updated expected discount calculation to reflect new rates."
 git push origin "$RED_BRANCH"
 echo "  ✓ $RED_BRANCH pushed"
 
-# ── 4. Create feature/add-flash-sale-pricing LAST (GREEN — passes CI) ─────────
+# ── 4. Create feature/add-volume-pricing LAST (GREEN — passes CI) ─────────────
 echo ""
 echo "→ Creating $GREEN_BRANCH..."
 git checkout main
 git checkout -b "$GREEN_BRANCH"
 
-# Write complete product.rb with flash_sale_price method added
 cat > app/models/product.rb << 'RUBY'
 class Product < ApplicationRecord
   belongs_to :category
@@ -194,20 +194,34 @@ class Product < ApplicationRecord
 
     discounted_price(sale_percent)
   end
+
+  def volume_price(customer_tier)
+    raise ArgumentError, "Invalid customer tier" unless %w[standard silver gold platinum].include?(customer_tier)
+
+    multiplier = case customer_tier
+                 when "standard" then 1.0
+                 when "silver"   then 0.95
+                 when "gold"     then 0.90
+                 when "platinum" then 0.85
+                 end
+    (price * multiplier).round(2)
+  end
 end
 RUBY
 
 git add app/models/product.rb
-git commit -m "feat: add time-bounded flash sale pricing to Product model
+git commit -m "feat: add volume pricing tiers by customer tier
 
-Products now support flash sale pricing with automatic
-time-based activation and expiry:
-- Accepts a discount percent, start time, and end time
-- Returns the discounted price only during the active window
-- Returns list price outside the sale window
-- Validates sale percent is between 1 and 90
+Products now support customer-tier-based pricing:
+- standard:  list price
+- silver:    5% discount
+- gold:      10% discount
+- platinum:  15% discount
 
-Closes #14"
+Supports Atlas Commerce B2B pricing strategy for
+long-term contract customers.
+
+Closes #18"
 
 git push origin "$GREEN_BRANCH"
 echo "  ✓ $GREEN_BRANCH pushed"
@@ -224,7 +238,7 @@ echo "║                                                                      �
 echo "║  Demo arc:                                                           ║"
 echo "║    1. Open PR from demo/failing-test        → CI fails (red)       ║"
 echo "║    2. Close without merging                                         ║"
-echo "║    3. Open PR from feature/add-flash-sale-pricing → CI passes      ║"
+echo "║    3. Open PR from feature/add-volume-pricing → CI passes          ║"
 echo "║    4. Merge → staging auto-deploys                                  ║"
 echo "║    5. Approve production deployment                                 ║"
 echo "║    6. Actions tab → Run workflow → on-demand deploy                 ║"
