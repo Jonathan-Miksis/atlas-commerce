@@ -68,12 +68,6 @@ RSpec.describe Product, type: :model do
     end
   end
 
-  # -----------------------------------------------------------------------
-  # DEMO NOTE: This test is intentionally written correctly and passes.
-  # For Beat 2 of the live demo (the failing test), use the branch
-  # `demo/failing-test` which changes the assertion to expect the WRONG
-  # value — proving that bad logic is caught before it reaches main.
-  # -----------------------------------------------------------------------
   describe "#discounted_price" do
     let(:product) { build(:product, price: 100.00) }
 
@@ -96,10 +90,9 @@ RSpec.describe Product, type: :model do
 
     it "raises ArgumentError for invalid discount percentage" do
       expect { product.discounted_price(101) }.to raise_error(ArgumentError, /between 0 and 100/)
-      expect { product.discounted_price(-1) }.to  raise_error(ArgumentError, /between 0 and 100/)
+      expect { product.discounted_price(-1) }.to raise_error(ArgumentError, /between 0 and 100/)
     end
   end
-end
 
   describe "#bulk_price" do
     let(:product) { build(:product, price: 100.00) }
@@ -132,15 +125,16 @@ end
       expect { product.bulk_price(-1) }.to raise_error(ArgumentError, /positive/)
     end
 
-    it "returns correct price for boundary quantity 10" do
+    it "returns lower price at quantity 10 than quantity 9" do
       expect(product.bulk_price(10)).to be < product.bulk_price(9)
     end
 
-    it "returns correct price for boundary quantity 50" do
+    it "returns lower price at quantity 50 than quantity 49" do
       expect(product.bulk_price(50)).to be < product.bulk_price(49)
     end
 
-    it "returns correct price for boundary quantity 100" do
+    it "returns lower price at quantity 100 than quantity 99" do
       expect(product.bulk_price(100)).to be < product.bulk_price(99)
     end
   end
+end
