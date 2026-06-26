@@ -33,4 +33,13 @@ class Product < ApplicationRecord
                end
     discounted_price(discount)
   end
+
+  def flash_sale_price(sale_percent, starts_at, ends_at)
+    raise ArgumentError, "Sale percent must be between 1 and 90" unless sale_percent.between?(1, 90)
+    raise ArgumentError, "Sale must end after it starts" unless ends_at > starts_at
+
+    return price unless Time.current.between?(starts_at, ends_at)
+
+    discounted_price(sale_percent)
+  end
 end
