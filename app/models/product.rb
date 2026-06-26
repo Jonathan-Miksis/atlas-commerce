@@ -42,4 +42,16 @@ class Product < ApplicationRecord
 
     discounted_price(sale_percent)
   end
+
+  def volume_price(customer_tier)
+    raise ArgumentError, "Invalid customer tier" unless %w[standard silver gold platinum].include?(customer_tier)
+
+    multiplier = case customer_tier
+                 when "standard" then 1.0
+                 when "silver"   then 0.95
+                 when "gold"     then 0.90
+                 when "platinum" then 0.85
+                 end
+    (price * multiplier).round(2)
+  end
 end
