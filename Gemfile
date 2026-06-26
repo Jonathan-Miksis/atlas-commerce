@@ -15,6 +15,7 @@ group :development, :test do
   gem "factory_bot_rails"
   gem "faker"
   gem "rspec_junit_formatter"
+  gem "bundler-audit"
   gem "rubocop", "~> 1.60", require: false
   gem "rubocop-rails", require: false
   gem "rubocop-rspec", require: false

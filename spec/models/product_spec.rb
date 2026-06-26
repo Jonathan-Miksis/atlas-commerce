@@ -100,3 +100,47 @@ RSpec.describe Product, type: :model do
     end
   end
 end
+
+  describe "#bulk_price" do
+    let(:product) { build(:product, price: 100.00) }
+
+    it "returns full price for quantities 1-9" do
+      expect(product.bulk_price(1)).to eq(100.00)
+      expect(product.bulk_price(9)).to eq(100.00)
+    end
+
+    it "applies 5% discount for quantities 10-49" do
+      expect(product.bulk_price(10)).to eq(95.00)
+      expect(product.bulk_price(49)).to eq(95.00)
+    end
+
+    it "applies 10% discount for quantities 50-99" do
+      expect(product.bulk_price(50)).to eq(90.00)
+      expect(product.bulk_price(99)).to eq(90.00)
+    end
+
+    it "applies 15% discount for quantities 100+" do
+      expect(product.bulk_price(100)).to eq(85.00)
+      expect(product.bulk_price(500)).to eq(85.00)
+    end
+
+    it "raises ArgumentError for zero quantity" do
+      expect { product.bulk_price(0) }.to raise_error(ArgumentError, /positive/)
+    end
+
+    it "raises ArgumentError for negative quantity" do
+      expect { product.bulk_price(-1) }.to raise_error(ArgumentError, /positive/)
+    end
+
+    it "returns correct price for boundary quantity 10" do
+      expect(product.bulk_price(10)).to be < product.bulk_price(9)
+    end
+
+    it "returns correct price for boundary quantity 50" do
+      expect(product.bulk_price(50)).to be < product.bulk_price(49)
+    end
+
+    it "returns correct price for boundary quantity 100" do
+      expect(product.bulk_price(100)).to be < product.bulk_price(99)
+    end
+  end

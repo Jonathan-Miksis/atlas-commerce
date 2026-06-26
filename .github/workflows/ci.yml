@@ -1,9 +1,9 @@
 # ─────────────────────────────────────────────────────────────────────────────
 # CI Workflow — runs on every pull request targeting main
 #
-# What this does: automatically lints, tests, and builds the app whenever
-# a PR is opened or updated. All three jobs run in parallel — the result
-# appears on the PR before a human reviewer opens it.
+# What this does: automatically lints, tests, audits, and builds the app
+# whenever a PR is opened or updated. All four jobs run in parallel —
+# the result appears on the PR before a human reviewer opens it.
 # ─────────────────────────────────────────────────────────────────────────────
 
 name: CI
@@ -80,12 +80,39 @@ jobs:
           name: rspec-test-results
           path: tmp/rspec-results.xml
 
-  # ── Job 3: Build ────────────────────────────────────────────────────────────
+  # ── Job 3: Security Audit ───────────────────────────────────────────────────
+  # Checks all gems against the Ruby Advisory Database for known CVEs.
+  # Catches dependency vulnerabilities before they reach production.
+  # This is the kind of check that would have caught Log4Shell-style issues.
+  security:
+    name: Security audit
+    runs-on: ubuntu-latest   # third separate runner — runs in parallel
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.2.3"
+          bundler-cache: true
+
+      - name: Update advisory database
+        run: bundle exec bundler-audit update
+        # Downloads the latest known vulnerability advisories
+
+      - name: Run security audit
+        run: bundle exec bundler-audit check --format text
+        # Fails the job if any gem has a known CVE — same exit code model
+        # as RSpec: non-zero exit = job failure = merge blocked
+
+  # ── Job 4: Build ────────────────────────────────────────────────────────────
   # Boots the Rails app in a clean environment to catch load-time errors.
   # Verifies the app starts successfully — independent of the test suite.
   build:
     name: Build check
-    runs-on: ubuntu-latest   # third separate runner — all three jobs are parallel
+    runs-on: ubuntu-latest   # fourth separate runner — all four jobs are parallel
 
     steps:
       - name: Checkout code
