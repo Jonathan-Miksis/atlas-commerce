@@ -2,8 +2,10 @@ require "rails_helper"
 
 RSpec.describe "Api::V1::Categories", type: :request do
   describe "GET /api/v1/categories" do
-    let!(:electronics) { create(:category, name: "Electronics", slug: "electronics") }
-    let!(:office) { create(:category, name: "Office Supplies", slug: "office-supplies") }
+    before do
+      create(:category, name: "Electronics", slug: "electronics")
+      create(:category, name: "Office Supplies", slug: "office-supplies")
+    end
 
     it "returns all categories" do
       get "/api/v1/categories"
@@ -25,34 +27,34 @@ RSpec.describe "Api::V1::Categories", type: :request do
   end
 
   describe "GET /api/v1/categories/:slug" do
-    let!(:electronics) { create(:category, name: "Electronics", slug: "electronics") }
-
-    context "with a valid slug" do
-      it "returns the category" do
-        get "/api/v1/categories/electronics"
-        expect(response).to have_http_status(:ok)
-        expect(response.parsed_body["name"]).to eq("Electronics")
-      end
-
-      it "returns the category's products" do
-        create_list(:product, 3, category: electronics)
-        get "/api/v1/categories/electronics"
-        expect(response.parsed_body["products"].length).to eq(3)
-      end
-
-      it "only returns active products" do
-        create(:product, category: electronics, active: true)
-        create(:product, :inactive, category: electronics)
-        get "/api/v1/categories/electronics"
-        expect(response.parsed_body["products"].length).to eq(1)
-      end
+    before do
+      create(:category, name: "Electronics", slug: "electronics")
     end
 
-    context "with an invalid slug" do
-      it "returns 404" do
-        get "/api/v1/categories/does-not-exist"
-        expect(response).to have_http_status(:not_found)
-      end
+    it "returns the category" do
+      get "/api/v1/categories/electronics"
+      expect(response).to have_http_status(:ok)
+      expect(response.parsed_body["name"]).to eq("Electronics")
+    end
+
+    it "returns the category's products" do
+      electronics = Category.find_by(slug: "electronics")
+      create_list(:product, 3, category: electronics)
+      get "/api/v1/categories/electronics"
+      expect(response.parsed_body["products"].length).to eq(3)
+    end
+
+    it "only returns active products" do
+      electronics = Category.find_by(slug: "electronics")
+      create(:product, category: electronics, active: true)
+      create(:product, :inactive, category: electronics)
+      get "/api/v1/categories/electronics"
+      expect(response.parsed_body["products"].length).to eq(1)
+    end
+
+    it "returns 404 for an unknown slug" do
+      get "/api/v1/categories/does-not-exist"
+      expect(response).to have_http_status(:not_found)
     end
   end
 end
