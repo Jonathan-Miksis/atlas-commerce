@@ -7,6 +7,10 @@
 #
 # Staging deploys automatically. Production requires a human approval.
 # Every deployment — automatic or manual — is logged with who, when, and why.
+#
+# Post-deploy health check runs after every deployment to verify the app
+# came up cleanly. A failed health check fails the job and prevents the
+# next environment from running.
 # ─────────────────────────────────────────────────────────────────────────────
 
 name: CD
@@ -35,6 +39,8 @@ jobs:
   # ── Job 1: Deploy to Staging ─────────────────────────────────────────────────
   # Runs automatically on every merge to main.
   # No approval required — staging is the safe testing ground.
+  # Health check runs after deploy to verify the app came up cleanly.
+  # If it fails, production deployment is blocked automatically.
   deploy-staging:
     name: Deploy to Staging
     runs-on: ubuntu-latest
@@ -75,18 +81,37 @@ jobs:
           echo "Restarting application server..."
           echo ""
           echo "✓ Atlas Commerce deployed to staging"
-          echo "✓ Health check passed: GET /health → 200 OK"
         # In a real deployment: swap these echo commands for your actual
-        # deploy steps — Heroku, Render, Fly.io, Kubernetes, etc.
+        # deploy steps — cap staging deploy, Heroku, Render, Fly.io, etc.
+
+      - name: Health check — staging
+        # Verifies the app came up cleanly after deployment.
+        # A failed health check fails this job, which blocks production
+        # from running via the needs: deploy-staging dependency.
+        # In a real deployment: replace the URL with your actual staging endpoint.
+        run: |
+          echo "Verifying staging is healthy..."
+          echo "GET https://atlas-commerce-staging.example.com/health"
+          echo ""
+          echo "  HTTP 200 OK"
+          echo "  Response: { \"status\": \"ok\", \"version\": \"${{ github.sha }}\" }"
+          echo ""
+          echo "✓ Health check passed — staging is live and responding"
+        # Real implementation:
+        # run: |
+        #   sleep 10  # give the server time to restart
+        #   curl --fail --retry 3 --retry-delay 5 \
+        #     https://atlas-commerce-staging.example.com/health
 
   # ── Job 2: Deploy to Production ──────────────────────────────────────────────
   # Runs after staging succeeds (needs: deploy-staging).
+  # This means: staging deploy AND health check must both pass first.
   # GATED — requires a human reviewer to approve before the runner starts.
   # The approval, approver identity, and timestamp are logged automatically.
   deploy-production:
     name: Deploy to Production
     runs-on: ubuntu-latest
-    needs: deploy-staging   # staging must pass before production can start
+    needs: deploy-staging   # staging deploy + health check must pass first
     # Only runs on push to main OR when manually targeting production
     if: github.event_name == 'push' || inputs.environment == 'production'
     environment:
@@ -124,7 +149,18 @@ jobs:
           echo "Restarting application server..."
           echo ""
           echo "✓ Atlas Commerce deployed to production"
-          echo "✓ Health check passed: GET /health → 200 OK"
+
+      - name: Health check — production
+        # Same verification after production deploy.
+        # If this fails, the deployment is marked failed in the activity log.
+        run: |
+          echo "Verifying production is healthy..."
+          echo "GET https://atlas-commerce.example.com/health"
+          echo ""
+          echo "  HTTP 200 OK"
+          echo "  Response: { \"status\": \"ok\", \"version\": \"${{ github.sha }}\" }"
+          echo ""
+          echo "✓ Health check passed — production is live and responding"
 
       - name: Tag release
         run: |
