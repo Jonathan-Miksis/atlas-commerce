@@ -6,7 +6,7 @@
 # ─────────────────────────────────────────────────────────────────────────────
 set -e
 
-GREEN_BRANCH="feature/add-volume-pricing"
+GREEN_BRANCH="feature/add-loyalty-pricing"
 RED_BRANCH="demo/failing-test"
 
 echo ""
@@ -205,18 +205,19 @@ end
 RUBY
 
 git add app/models/product.rb
-git commit -m "feat: add volume pricing tiers by customer tier
+git commit -m "feat: add loyalty pricing based on customer tenure
 
-Products now support customer-tier-based pricing:
-- standard:  list price
-- silver:    5% discount
-- gold:      10% discount
-- platinum:  15% discount
+Long-term B2B customers receive automatic discounts
+based on years as a customer:
+- 0-1 years:   list price
+- 2-4 years:   3% discount
+- 5-9 years:   7% discount
+- 10+ years:   12% discount
 
-Supports Atlas Commerce B2B pricing strategy for
-long-term contract customers.
+Supports Atlas Commerce retention strategy for
+enterprise accounts on multi-year contracts.
 
-Closes #18"
+Closes #27"
 
 git push origin "$GREEN_BRANCH"
 echo "  ✓ $GREEN_BRANCH pushed"
