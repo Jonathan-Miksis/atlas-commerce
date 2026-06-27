@@ -87,6 +87,15 @@ jobs:
           name: rspec-test-results
           path: tmp/rspec-results.xml
 
+      - name: Annotate test results on PR
+        uses: dorny/test-reporter@v1       # reads JUnit XML and posts inline
+        if: always()                       # annotations on the PR diff
+        with:
+          name: RSpec Results
+          path: tmp/rspec-results.xml
+          reporter: java-junit
+          fail-on-error: false
+
   # ── Job 3: Security Audit ───────────────────────────────────────────────────
   # Checks all gems against the Ruby Advisory Database for known CVEs.
   # Catches dependency vulnerabilities before they reach production.
