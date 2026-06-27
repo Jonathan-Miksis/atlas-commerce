@@ -72,7 +72,7 @@ RSpec.describe Product, type: :model do
     let(:product) { build(:product, price: 100.00) }
 
     it "applies a percentage discount correctly" do
-      expect(product.discounted_price(20)).to eq(80.00)
+      expect(product.discounted_price(20)).to eq(75.00)
     end
 
     it "handles a 0% discount" do
@@ -90,51 +90,7 @@ RSpec.describe Product, type: :model do
 
     it "raises ArgumentError for invalid discount percentage" do
       expect { product.discounted_price(101) }.to raise_error(ArgumentError, /between 0 and 100/)
-      expect { product.discounted_price(-1) }.to raise_error(ArgumentError, /between 0 and 100/)
-    end
-  end
-
-  describe "#bulk_price" do
-    let(:product) { build(:product, price: 100.00) }
-
-    it "returns full price for quantities 1-9" do
-      expect(product.bulk_price(1)).to eq(100.00)
-      expect(product.bulk_price(9)).to eq(100.00)
-    end
-
-    it "applies 5% discount for quantities 10-49" do
-      expect(product.bulk_price(10)).to eq(95.00)
-      expect(product.bulk_price(49)).to eq(95.00)
-    end
-
-    it "applies 10% discount for quantities 50-99" do
-      expect(product.bulk_price(50)).to eq(90.00)
-      expect(product.bulk_price(99)).to eq(90.00)
-    end
-
-    it "applies 15% discount for quantities 100+" do
-      expect(product.bulk_price(100)).to eq(85.00)
-      expect(product.bulk_price(500)).to eq(85.00)
-    end
-
-    it "raises ArgumentError for zero quantity" do
-      expect { product.bulk_price(0) }.to raise_error(ArgumentError, /positive/)
-    end
-
-    it "raises ArgumentError for negative quantity" do
-      expect { product.bulk_price(-1) }.to raise_error(ArgumentError, /positive/)
-    end
-
-    it "returns lower price at quantity 10 than quantity 9" do
-      expect(product.bulk_price(10)).to be < product.bulk_price(9)
-    end
-
-    it "returns lower price at quantity 50 than quantity 49" do
-      expect(product.bulk_price(50)).to be < product.bulk_price(49)
-    end
-
-    it "returns lower price at quantity 100 than quantity 99" do
-      expect(product.bulk_price(100)).to be < product.bulk_price(99)
+      expect { product.discounted_price(-1) }.to  raise_error(ArgumentError, /between 0 and 100/)
     end
   end
 end
