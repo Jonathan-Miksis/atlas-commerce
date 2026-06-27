@@ -25,12 +25,8 @@ class Product < ApplicationRecord
   def bulk_price(quantity)
     raise ArgumentError, "Quantity must be positive" unless quantity.positive?
 
-    discount = case quantity
-               when 1..9   then 0
-               when 10..49 then 5
-               when 50..99 then 10
-               else 15
-               end
+    discounts = { (1..9) => 0, (10..49) => 5, (50..99) => 10, (100..) => 15 }
+    discount = discounts.find { |range, _| range.cover?(quantity) }&.last || 0
     discounted_price(discount)
   end
 
@@ -48,5 +44,17 @@ class Product < ApplicationRecord
 
     multipliers = { "standard" => 1.0, "silver" => 0.95, "gold" => 0.90, "platinum" => 0.85 }
     (price * multipliers[customer_tier]).round(2)
+  end
+
+  def loyalty_price(years_as_customer)
+    raise ArgumentError, "Years must be a non-negative integer" unless years_as_customer.is_a?(Integer) && years_as_customer >= 0
+
+    discount = case years_as_customer
+               when 0..1 then 0
+               when 2..4 then 3
+               when 5..9 then 7
+               else 12
+               end
+    discounted_price(discount)
   end
 end
