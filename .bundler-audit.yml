@@ -15,3 +15,6 @@ ignore:
   - CVE-2026-47736   # puma PROXY Protocol memory exhaustion
   - CVE-2026-47737   # puma PROXY Protocol repeated headers
   - GHSA-6jxj-px6v-747w  # crass deeply nested CSS blocks — transitive dep via actionview
+  - GHSA-6wmf-3r64-vcwv  # crass large numeric exponents DoS
+  - GHSA-8vfg-2r28-hvhj  # crass non-ASCII characters CPU consumption
+  - GHSA-wwpr-jff3-395c  # crass adjacent CSS comments SystemStackError
