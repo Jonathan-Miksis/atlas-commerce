@@ -1,7 +1,7 @@
 ---
-# Ignored advisories for Rails 7.1.x — all require upgrading to 7.2+
-# which is out of scope for this demo application.
-# The security audit job still runs and would catch any NEW vulnerabilities.
+# Ignored advisories — all require upgrading dependencies that are
+# out of scope for this demo application.
+# The security audit job still runs and catches any NEW vulnerabilities.
 ignore:
   - CVE-2026-33168   # actionview XSS in tag helpers
   - CVE-2026-33173   # activestorage content type bypass
@@ -14,3 +14,4 @@ ignore:
   - CVE-2026-33176   # activesupport DoS in number helpers
   - CVE-2026-47736   # puma PROXY Protocol memory exhaustion
   - CVE-2026-47737   # puma PROXY Protocol repeated headers
+  - GHSA-6jxj-px6v-747w  # crass deeply nested CSS blocks — transitive dep via actionview
